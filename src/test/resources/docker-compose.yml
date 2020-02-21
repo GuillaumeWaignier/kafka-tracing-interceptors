@@ -1,0 +1,90 @@
+version: "3.7"
+services:
+  zookeeper:
+    image: "confluentinc/cp-zookeeper:5.3.1"
+    hostname: zookeeper
+    networks:
+      - confluent
+    environment:
+      - ZOOKEEPER_SERVER_ID=1
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+      - KAFKA_OPTS=-Xms128m -Xmx128m
+    healthcheck:
+      test: test `echo "ruok" | nc localhost 2181 | grep "imok"`
+      interval: 2s
+      timeout: 2s
+      retries: 3
+      start_period: 2s
+
+  kafka:
+    image: "confluentinc/cp-enterprise-kafka:5.3.1"
+    hostname: kafka
+    ports:
+      - 9092:9092
+    networks:
+      - confluent
+    depends_on:
+      - zookeeper
+    environment:
+      - KAFKA_BROKER_ID=101
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_DELETE_TOPIC_ENABLE=true
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_OPTS=-Xms256m -Xmx256m
+
+  schema-registry:
+    image: "confluentinc/cp-schema-registry:5.3.1"
+    hostname: schema-registry
+    depends_on:
+      - kafka
+    ports:
+      - 8081:8081
+    networks:
+      - confluent
+    environment:
+      - SCHEMA_REGISTRY_OPTS=-Xms256m -Xmx256m
+      - SCHEMA_REGISTRY_LISTENERS=http://0.0.0.0:8081
+      - SCHEMA_REGISTRY_HOST_NAME=schema-registry
+      - SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL=zookeeper:2181
+      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=PLAINTEXT://kafka:9092
+      - SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL=PLAINTEXT
+      - SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR=1
+    restart: on-failure
+
+  load-data:
+    image: "ianitrix/kafka:latest"
+    networks:
+      - confluent
+    command: "kafka-producer-perf-test --topic test --num-records 1000000 --throughput 1 --record-size 100 --producer-props interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor bootstrap.servers=kafka:9092"
+    volumes:
+      - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-5.4.0/share/java/kafka/tracing-interceptors.jar:ro
+    depends_on:
+      - kafka
+    restart: on-failure
+
+  kafkahq:
+    image: tchiotludo/kafkahq:0.11.0
+    container_name: kafkahq
+    networks:
+      - confluent
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKAHQ_CONFIGURATION: |
+        kafkahq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: "kafka:9092"
+              schema-registry:
+                url: "http://schema-registry:8081"
+
+
+networks:
+  confluent:
