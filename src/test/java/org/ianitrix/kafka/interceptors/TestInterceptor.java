@@ -22,10 +22,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Testcontainers
 public class TestInterceptor {
@@ -58,7 +55,7 @@ public class TestInterceptor {
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, ProducerTracingInterceptor.class.getName());
-        producer = new KafkaProducer<String, String>(config);
+        producer = new KafkaProducer<>(config);
     }
 
     private static void createConsumer() {
@@ -70,11 +67,11 @@ public class TestInterceptor {
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, ConsumerTracingInterceptor.class.getName());
-        consumer = new KafkaConsumer<String, String>(config);
+        consumer = new KafkaConsumer<>(config);
     }
 
     @Test
-    public void testSendMessage() throws Exception {
+    public void testSendMessage() {
 
         //send
         final String key = "A";

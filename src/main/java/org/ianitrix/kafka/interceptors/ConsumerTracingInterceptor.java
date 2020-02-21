@@ -31,7 +31,7 @@ public class ConsumerTracingInterceptor extends AbstractTracingInterceptor imple
 
     @Override
     public ConsumerRecords<Object, Object> onConsume(final ConsumerRecords<Object, Object> records) {
-        records.forEach(record -> sendConsume(record));
+        records.forEach(this::sendConsume);
         return records;
     }
 
@@ -46,7 +46,7 @@ public class ConsumerTracingInterceptor extends AbstractTracingInterceptor imple
 
     @Override
     public void onCommit(final Map<TopicPartition, OffsetAndMetadata> offsets) {
-        offsets.forEach((topicPartition, offsetAndMetadata) -> sendAck(topicPartition, offsetAndMetadata));
+        offsets.forEach(this::sendAck);
     }
 
     private void sendAck(final TopicPartition topicPartition, final OffsetAndMetadata offsetAndMetadata) {

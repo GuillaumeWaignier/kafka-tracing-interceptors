@@ -40,7 +40,7 @@ public class TraceTopicConsumer implements Runnable {
         config.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        this.consumer = new KafkaConsumer<String, String>(config);
+        this.consumer = new KafkaConsumer<>(config);
     }
 
     @Override

@@ -43,7 +43,7 @@ public abstract class AbstractTracingInterceptor  {
         //producerConfig.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
         producerConfig.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip");
 
-        this.producer = new KafkaProducer<String, String>(producerConfig);
+        this.producer = new KafkaProducer<>(producerConfig);
     }
 
     protected void close() {
@@ -67,7 +67,7 @@ public abstract class AbstractTracingInterceptor  {
             final String keyJson = this.mapper.writeValueAsString(key);
             final String valueJson = this.mapper.writeValueAsString(value);
 
-            final ProducerRecord<String, String> traceRecord = new ProducerRecord(TRACE_TOPIC, keyJson, valueJson);
+            final ProducerRecord<String, String> traceRecord = new ProducerRecord<>(TRACE_TOPIC, keyJson, valueJson);
             this.producer.send(traceRecord);
         } catch (final JsonProcessingException e) {
             log.error("Impossible to send Trace with key={}, value={}", key, value, e);
