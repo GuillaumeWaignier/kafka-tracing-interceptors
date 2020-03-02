@@ -11,7 +11,7 @@ jdk:
 
 
 script:
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=GuillaumeWaignier_kafka-tracing-interceptors
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent org.jacoco:jacoco-maven-plugin:report package sonar:sonar
 
 
 cache:
