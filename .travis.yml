@@ -1,0 +1,20 @@
+language: java
+install: true
+
+addons:
+  sonarcloud:
+    organization: "guillaumewaignier-github"
+    token:
+      secure: "khXugquTLDDNB1KZLfsdtNfW3WvUVodUem0qpLl4gskqQLTUgdsgvggh8RrxHjGStEO9iST5Na+ZeA3XdNMFlyLCVahEfzsWphmz8fa89Hr8Ietg9ua98aNwloIp4ErJ1f6WAeW49YLwL6E1sVjq1xNf5qHxCJIZX4PjJx79+jPkrwxi0lE8i4Z1g/Ih3pjOeNZy8zQGgGEBjojuJnjwjqGnEKQayPYYeU5G+qvmIN8OsW4V2Ns68lY4BvRi8RDNJKLe60MTMuttoLroX7TqhZ7rVrasAMtBxMojS0+dcQ9g7Bme8oZbz5wLRkTfwkM7EhKsIjfFSb4UvsCOJGoZMvFKLp5TtnHKA6wC/pZTht4yDCYyldhLt0a8bsz/ZJsA1doZ+lRRrsM+BcEU/5x9isXXOAIIyIZYzQ1nkAGCr0AUKQA/h/l8p5jA5tP3lywYW53VfMOFDLfpq+l0iOJOT4xfctndIte4+ORm8lV7HmwSMk2yxdo+Wr0RAHRDEcRfVKpXFO3NOGjq6ci0rrUrC3zleoCCT7JcAUW/h5kcdAVsj+MIhihlJwnshkQxT8vJWNEkpaoN7V1NeikgupVjeUWEga/+PoYYzeQ6ASNe0l0ejremnGz+dvg6lOLgNrRnxqY0kjLPfv9ga7fCqwI8kQLod+VfteStuHr5ZDZmC6Q="
+jdk:
+  - openjdk11
+
+
+script:
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=GuillaumeWaignier_kafka-tracing-interceptors
+
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
