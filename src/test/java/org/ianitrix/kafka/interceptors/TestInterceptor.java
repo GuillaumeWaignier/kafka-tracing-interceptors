@@ -1,5 +1,6 @@
 package org.ianitrix.kafka.interceptors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Testcontainers
+@Slf4j
 public class TestInterceptor {
 
     private static final String TEST_TOPIC = "test";
@@ -39,6 +41,10 @@ public class TestInterceptor {
     private static KafkaConsumer<String, String> consumer;
     private static TraceTopicConsumer traceTopicConsumer;
 
+    private static final String PRODUCER_CLIENT_ID = "producerClientId";
+    private static final String CONSUMER_CLIENT_ID = "consumerClientId";
+    private static final String CONSUMER_GROUP_ID = "TestInterceptor";
+
     @BeforeAll
     public static void globalInit() {
         createProducer();
@@ -50,6 +56,7 @@ public class TestInterceptor {
         final Map<String, Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
         config.put(ProducerConfig.ACKS_CONFIG, "all");
+        config.put(ProducerConfig.CLIENT_ID_CONFIG, PRODUCER_CLIENT_ID);
         //config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
         config.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip");
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -62,7 +69,8 @@ public class TestInterceptor {
         final Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
         config.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "TestInterceptor");
+        config.put(ConsumerConfig.CLIENT_ID_CONFIG, CONSUMER_CLIENT_ID);
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, CONSUMER_GROUP_ID);
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -96,7 +104,9 @@ public class TestInterceptor {
         }
 
         //check trace
-        Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> traceTopicConsumer.traces.size() == 5);
+        Awaitility.await().atMost(Duration.FIVE_MINUTES).until(() -> traceTopicConsumer.traces.size() == 5);
+
+        log.info("5 messages consumed {}", traceTopicConsumer.traces.toString());
 
         //send
         final TracingValue send = traceTopicConsumer.traces.get(0);
@@ -105,6 +115,7 @@ public class TestInterceptor {
         final String correlationId = send.getCorrelationId();
         Assertions.assertNotNull(correlationId);
         Assertions.assertNotNull(send.getDate());
+        Assertions.assertEquals(PRODUCER_CLIENT_ID, send.getClientId());
 
         // ack
         final TracingValue ack = traceTopicConsumer.traces.get(1);
@@ -113,6 +124,7 @@ public class TestInterceptor {
         Assertions.assertEquals(partition, ack.getPartition());
         Assertions.assertEquals(offset, ack.getOffset());
         Assertions.assertNotNull(ack.getDate());
+        Assertions.assertEquals(PRODUCER_CLIENT_ID, ack.getClientId());
 
         // consume
         final TracingValue consume = traceTopicConsumer.traces.get(2);
@@ -122,16 +134,20 @@ public class TestInterceptor {
         Assertions.assertEquals(offset, consume.getOffset());
         Assertions.assertEquals(correlationId, consume.getCorrelationId());
         Assertions.assertNotNull(consume.getDate());
+        Assertions.assertEquals(CONSUMER_CLIENT_ID, consume.getClientId());
+        Assertions.assertEquals(CONSUMER_GROUP_ID, consume.getGroupId());
 
         // commit for each partition
         for (int i = 0 ; i < 2 ; i++) {
             final TracingValue commit = traceTopicConsumer.traces.get(3 + i);
             Assertions.assertEquals(TraceType.COMMIT, commit.getType());
             Assertions.assertEquals(TEST_TOPIC, commit.getTopic());
+            Assertions.assertEquals(CONSUMER_CLIENT_ID, commit.getClientId());
+            Assertions.assertEquals(CONSUMER_GROUP_ID, commit.getGroupId());
             if (commit.getPartition() == partition) {
-                Assertions.assertEquals(offset + 1, commit.getOffset());
+                Assertions.assertEquals(offset , commit.getOffset());
             } else {
-                Assertions.assertEquals(0, commit.getOffset());
+                Assertions.assertEquals(-1, commit.getOffset());
             }
             Assertions.assertNotNull(commit.getDate());
         }

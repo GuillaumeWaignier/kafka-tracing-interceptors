@@ -38,20 +38,44 @@ public class ConsumerTracingInterceptor extends AbstractTracingInterceptor imple
     private void sendConsume(final ConsumerRecord<Object, Object> record) {
         final String correlationId = super.getOrCreateCorrelationID(record.headers());
 
-        final TracingKey key = new TracingKey(record.topic(), record.partition(), record.offset());
-        final TracingValue value = new TracingValue(record.topic(), record.partition(), record.offset(), correlationId, Instant.now().toString(), TraceType.CONSUME);
+        final TracingKey key = TracingKey.builder()
+                .topic(record.topic())
+                .partition(record.partition())
+                .offset(record.offset())
+                .build();
+
+        final TracingValue value = TracingValue.builder()
+                .topic(record.topic())
+                .partition(record.partition())
+                .offset(record.offset())
+                .correlationId(correlationId)
+                .date(Instant.now().toString())
+                .type(TraceType.CONSUME)
+                .build();
 
         super.sendTrace(key, value);
     }
 
     @Override
     public void onCommit(final Map<TopicPartition, OffsetAndMetadata> offsets) {
-        offsets.forEach(this::sendAck);
+        offsets.forEach(this::sendCommit);
     }
 
-    private void sendAck(final TopicPartition topicPartition, final OffsetAndMetadata offsetAndMetadata) {
-        final TracingKey key = new TracingKey(topicPartition.topic(), topicPartition.partition(), offsetAndMetadata.offset());
-        final TracingValue value = new TracingValue(topicPartition.topic(), topicPartition.partition(), offsetAndMetadata.offset(), null, Instant.now().toString(), TraceType.COMMIT);
+    private void sendCommit(final TopicPartition topicPartition, final OffsetAndMetadata offsetAndMetadata) {
+        // store the commit offset - 1 since, this offset correspond to next message to consume
+        final TracingKey key = TracingKey.builder()
+                .topic(topicPartition.topic())
+                .partition(topicPartition.partition())
+                .offset(offsetAndMetadata.offset() - 1)
+                .build();
+
+        final TracingValue value = TracingValue.builder()
+                .topic(topicPartition.topic())
+                .partition(topicPartition.partition())
+                .offset(offsetAndMetadata.offset() - 1)
+                .date(Instant.now().toString())
+                .type(TraceType.COMMIT)
+                .build();
 
         super.sendTrace(key, value);
     }

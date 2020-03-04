@@ -32,8 +32,16 @@ public class ProducerTracingInterceptor extends AbstractTracingInterceptor imple
 
         final String correlationId = super.getOrCreateCorrelationID(record.headers());
 
-        final TracingKey key = new TracingKey(record.topic(), null, null);
-        final TracingValue value = new TracingValue(record.topic(), null, null, correlationId, Instant.now().toString(), TraceType.SEND);
+        final TracingKey key = TracingKey.builder()
+                .correlationId(correlationId)
+                .build();
+
+        final TracingValue value = TracingValue.builder()
+                .topic(record.topic())
+                .correlationId(correlationId)
+                .date(Instant.now().toString())
+                .type(TraceType.SEND)
+                .build();
 
         super.sendTrace(key, value);
         return record;
@@ -42,8 +50,21 @@ public class ProducerTracingInterceptor extends AbstractTracingInterceptor imple
     @Override
     public void onAcknowledgement(final RecordMetadata metadata, final Exception exception) {
         if (metadata != null) {
-            final TracingKey key = new TracingKey(metadata.topic(), metadata.partition(), metadata.offset());
-            final TracingValue value = new TracingValue(metadata.topic(), metadata.partition(), metadata.offset(), null, Instant.now().toString(), TraceType.ACK);
+
+            final TracingKey key = TracingKey.builder()
+                    .topic(metadata.topic())
+                    .partition(metadata.partition())
+                    .offset(metadata.offset())
+                    .build();
+
+            final TracingValue value =  TracingValue.builder()
+                    .topic(metadata.topic())
+                    .partition(metadata.partition())
+                    .offset(metadata.offset())
+                    .date(Instant.now().toString())
+                    .type(TraceType.ACK)
+                    .build();
+
             super.sendTrace(key, value);
         } else {
             //TODO handle error

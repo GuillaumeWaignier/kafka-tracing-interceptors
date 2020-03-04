@@ -3,6 +3,7 @@ package org.ianitrix.kafka.interceptors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -30,6 +31,8 @@ public abstract class AbstractTracingInterceptor  {
 
     private ObjectMapper mapper = new ObjectMapper();
     private KafkaProducer<String, String> producer;
+    private String clientId;
+    private String groupId;
 
     protected void configure(final Map<String, ?> configs) {
         final Map<String, Object> producerConfig = new HashMap<>();
@@ -44,6 +47,9 @@ public abstract class AbstractTracingInterceptor  {
         producerConfig.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip");
 
         this.producer = new KafkaProducer<>(producerConfig);
+
+        this.clientId = (String) configs.get(ProducerConfig.CLIENT_ID_CONFIG);
+        this.groupId = (String) configs.get(ConsumerConfig.GROUP_ID_CONFIG);
     }
 
     protected void close() {
@@ -62,6 +68,9 @@ public abstract class AbstractTracingInterceptor  {
     }
 
     protected void sendTrace(final TracingKey key, final TracingValue value) {
+
+        value.setClientId(this.clientId);
+        value.setGroupId(this.groupId);
 
         try {
             final String keyJson = this.mapper.writeValueAsString(key);
