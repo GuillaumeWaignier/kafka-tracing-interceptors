@@ -57,38 +57,6 @@ services:
       - SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR=1
     restart: on-failure
 
-  kafka-connect:
-    image: "confluentinc/cp-kafka-connect:5.3.1"
-    hostname: kafka-connect
-    depends_on:
-      - kafka
-    ports:
-      - 8083:8083
-    networks:
-      - confluent
-    environment:
-      - "CONNECT_BOOTSTRAP_SERVERS=kafka:9092"
-      - "CONNECT_REST_PORT=8083"
-      - "CONNECT_GROUP_ID=connect"
-      - "CONNECT_CONFIG_STORAGE_TOPIC=_connect-config"
-      - "CONNECT_OFFSET_STORAGE_TOPIC=_connect-offsets"
-      - "CONNECT_STATUS_STORAGE_TOPIC=_connect-status"
-      - "CONNECT_REPLICATION_FACTOR=1"
-      - "CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR=1"
-      - "CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR=1"
-      - "CONNECT_STATUS_STORAGE_REPLICATION_FACTOR=1"
-      - "CONNECT_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter"
-      - "CONNECT_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter"
-      - "CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL=http://schema-registry:8081"
-      - "CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL=http://schema-registry:8081"
-      - "CONNECT_INTERNAL_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter"
-      - "CONNECT_INTERNAL_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter"
-      - "CONNECT_REST_ADVERTISED_HOST_NAME=kafka-connect"
-      - "CONNECT_PLUGIN_PATH=/usr/share/java"
-      - "CONNECT_LOG4J_ROOT_LOGLEVEL=INFO"
-      - "CONNECT_LOG4J_LOGGERS=org.reflections=ERROR"
-    restart: on-failure
-
   load-data:
     image: "ianitrix/kafka:latest"
     networks:
@@ -133,3 +101,4 @@ services:
 
 networks:
   confluent:
+    name: confluent
