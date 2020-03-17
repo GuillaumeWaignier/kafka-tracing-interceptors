@@ -15,6 +15,7 @@ import java.util.Map;
 
 /**
  * Trace the messages consume inside a Kafka Topic
+ * @author Guillaume Waignier
  */
 @Slf4j
 public class ConsumerTracingInterceptor extends AbstractTracingInterceptor implements ConsumerInterceptor<Object, Object> {

@@ -13,6 +13,7 @@ import java.util.Map;
 
 /**
  * Trace the messages produce inside a Kafka Topic
+ * @author Guillaume Waignier
  */
 @Slf4j
 public class ProducerTracingInterceptor extends AbstractTracingInterceptor implements ProducerInterceptor<Object, Object> {

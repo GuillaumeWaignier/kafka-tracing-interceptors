@@ -14,42 +14,60 @@ import org.ianitrix.kafka.interceptors.pojo.TracingKey;
 import org.ianitrix.kafka.interceptors.pojo.TracingValue;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Common class to trace message
+ * @author Guillaume Waignier
  */
 @Slf4j
 public abstract class AbstractTracingInterceptor  {
 
     public static final String CORRELATION_ID_KEY = "correlationId";
     public static final String TRACE_TOPIC = "_tracing";
-    private static final List<String> COMMON_CONFIG = List.of(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG);
+    public static final String CONFIGURATION_PREFIX = "ianitrix.interceptor.";
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
+
     private KafkaProducer<String, String> producer;
     private String clientId;
     private String groupId;
 
     protected void configure(final Map<String, ?> configs) {
-        final Map<String, Object> producerConfig = new HashMap<>();
 
-        COMMON_CONFIG.forEach(conf -> producerConfig.put(conf, configs.get(conf)));
+        this.clientId = (String) configs.get(ProducerConfig.CLIENT_ID_CONFIG);
+        this.groupId = (String) configs.get(ConsumerConfig.GROUP_ID_CONFIG);
 
-        //TODO: handle secure brokers
+        // Init with the same config from broker
+        final Map<String, Object> producerConfig = new HashMap<>(configs);
+
+        // set default interceptor config
+        this.setDefaultConfig(producerConfig);
+
+        // override with custom config
+        this.overrideConfig(producerConfig);
+
+        this.producer = new KafkaProducer<>(producerConfig);
+    }
+
+    private void setDefaultConfig(final Map<String, Object> producerConfig) {
+        producerConfig.remove(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG);
         producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
         //producerConfig.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
-        producerConfig.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip");
+        producerConfig.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, producerConfig.getOrDefault(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip"));
+        producerConfig.put(ProducerConfig.CLIENT_ID_CONFIG, producerConfig.getOrDefault(ProducerConfig.CLIENT_ID_CONFIG, "") + "_interceptor");
+    }
 
-        this.producer = new KafkaProducer<>(producerConfig);
+    private void overrideConfig(final Map<String, Object> producerConfig) {
+        final LinkedList<String> customKey = producerConfig.keySet().stream()
+                .filter(key -> key.startsWith(CONFIGURATION_PREFIX))
+                .map(key -> key.substring(CONFIGURATION_PREFIX.length()))
+                .collect(Collectors.toCollection(LinkedList::new));
 
-        this.clientId = (String) configs.get(ProducerConfig.CLIENT_ID_CONFIG);
-        this.groupId = (String) configs.get(ConsumerConfig.GROUP_ID_CONFIG);
+        customKey.forEach(key -> producerConfig.put(key, producerConfig.get(CONFIGURATION_PREFIX+key)));
     }
 
     protected void close() {

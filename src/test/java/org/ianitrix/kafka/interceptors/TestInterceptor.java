@@ -58,10 +58,12 @@ public class TestInterceptor {
         config.put(ProducerConfig.ACKS_CONFIG, "all");
         config.put(ProducerConfig.CLIENT_ID_CONFIG, PRODUCER_CLIENT_ID);
         //config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
-        config.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip");
+        config.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "zstd");
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, ProducerTracingInterceptor.class.getName());
+
+        config.put(AbstractTracingInterceptor.CONFIGURATION_PREFIX + ProducerConfig.LINGER_MS_CONFIG, 1);
         producer = new KafkaProducer<>(config);
     }
 

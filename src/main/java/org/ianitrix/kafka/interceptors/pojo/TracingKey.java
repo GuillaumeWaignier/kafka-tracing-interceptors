@@ -2,12 +2,11 @@ package org.ianitrix.kafka.interceptors.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.*;
 
 /**
- * The key of the tracing messages
+ * The key of the tracing messages.
+ * @author Guillaume Waignier
  */
 @Getter
 @Setter
