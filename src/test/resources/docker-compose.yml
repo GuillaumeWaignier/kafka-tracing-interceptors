@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   zookeeper:
-    image: "confluentinc/cp-zookeeper:5.4.1"
+    image: "confluentinc/cp-zookeeper:${CONFLUENT_VERSION}"
     hostname: zookeeper
     networks:
       - confluent
@@ -18,7 +18,7 @@ services:
       start_period: 2s
 
   kafka:
-    image: "confluentinc/cp-enterprise-kafka:5.4.1"
+    image: "confluentinc/cp-enterprise-kafka:${CONFLUENT_VERSION}"
     hostname: kafka
     ports:
       - 9092:9092
@@ -39,7 +39,7 @@ services:
       - KAFKA_OPTS=-Xms256m -Xmx256m
 
   schema-registry:
-    image: "confluentinc/cp-schema-registry:5.4.1"
+    image: "confluentinc/cp-schema-registry:${CONFLUENT_VERSION}"
     hostname: schema-registry
     depends_on:
       - kafka
@@ -57,27 +57,6 @@ services:
       - SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR=1
     restart: on-failure
 
-  load-data:
-    image: "ianitrix/kafka:latest"
-    networks:
-      - confluent
-    command: "kafka-producer-perf-test --topic test --num-records 1000000 --throughput 1 --record-size 100 --producer-props interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor bootstrap.servers=kafka:9092 client.id=myProducer"
-    volumes:
-      - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-5.4.0/share/java/kafka/tracing-interceptors.jar:ro
-    depends_on:
-      - kafka
-    restart: on-failure
-
-  consume-data:
-    image: "ianitrix/kafka:latest"
-    networks:
-      - confluent
-    command: "kafka-console-consumer --topic test --from-beginning  --consumer-property interceptor.classes=org.ianitrix.kafka.interceptors.ConsumerTracingInterceptor --bootstrap-server kafka:9092 --consumer-property client.id=myConsumer --group=myGroup"
-    volumes:
-      - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-5.4.0/share/java/kafka/tracing-interceptors.jar:ro
-    depends_on:
-      - kafka
-    restart: on-failure
 
   kafkahq:
     image: tchiotludo/kafkahq:0.12.0
@@ -98,6 +77,29 @@ services:
               connect:
                 - name: default
                   url: "http://kafka-connect:8083"
+
+
+  load-data:
+    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    networks:
+      - confluent
+    depends_on:
+      - kafka
+    command: "kafka-producer-perf-test --topic test --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer-props interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor bootstrap.servers=kafka:9092 client.id=myProducer"
+    volumes:
+      - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
+    restart: on-failure
+
+  consume-data:
+    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    networks:
+      - confluent
+    depends_on:
+      - kafka
+    command: "kafka-console-consumer --topic test --from-beginning  --consumer-property interceptor.classes=org.ianitrix.kafka.interceptors.ConsumerTracingInterceptor --bootstrap-server kafka:9092 --consumer-property client.id=myConsumer --group=myGroup"
+    volumes:
+      - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
+    restart: on-failure
 
 networks:
   confluent:
