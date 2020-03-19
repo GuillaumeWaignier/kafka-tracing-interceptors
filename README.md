@@ -11,6 +11,7 @@ All traces are kafka messages sent to the topic **\_tracing**.
 
 Add the interceptor class in the kafka producer/consumer configuration:
 > interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor
+> or
 > interceptor.classes=org.ianitrix.kafka.interceptors.ConsumerTracingInterceptor
 
 By default, the kafka producer that sends traces uses the same configuration as the producer/consumer where the interceptors are attached.
@@ -82,7 +83,7 @@ final KafkaConsumer<String, String> consumer = new KafkaConsumer<>(config);
 
 Producer:
 
-````bash
+````properties
 ...
 interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor
 ianitrix.interceptor.bootstrap.servers=kafkatrace:9092
@@ -91,9 +92,9 @@ ianitrix.interceptor.compression.type=zstd
 
 Consumer:
 
-````bash
+````properties
+...
 interceptor.classes=org.ianitrix.kafka.interceptors.ConsumerTracingInterceptor
-interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor
 ianitrix.interceptor.bootstrap.servers=kafkatrace:9092
 ianitrix.interceptor.compression.type=zstd
 ````
@@ -105,13 +106,13 @@ All traces are kafka messages sent to the topic **\_tracing**.
 ## Send
 
 key:
-````json
+````yaml
 {"correlationId":"af8074bc-a042-46ef-8064-203fa26cd9b3"}
 ````
 
 value:
 
-````json
+````yaml
 {
   "topic": "test",
   "correlationId": "af8074bc-a042-46ef-8064-203fa26cd9b3",
@@ -124,12 +125,12 @@ value:
 ## Ack
 
 key:
-````json
+````yaml
 {"topic":"test","partition":0,"offset":0}
 ````
 
 value:
-````json
+````yaml
 {
   "topic": "test",
   "partition": 0,
@@ -143,12 +144,12 @@ value:
 ## Consume
 
 key:
-````json
+````yaml
 {"topic":"test","partition":0,"offset":0}
 ````
 
 value:
-````json
+````yaml
 {
   "topic": "test",
   "partition": 0,
@@ -164,12 +165,12 @@ value:
 ## Commit
 
 key:
-````json
+````yaml
 {"topic":"test","partition":0,"offset":33}
 ````
 
 value:
-````json
+````yaml
 {
   "topic": "test",
   "partition": 0,
@@ -191,7 +192,7 @@ and provide Kibana dashboard.
 
 A docker-compose file provides a full environment with kafka and a simple producer/consumer.
 
-````bash
+````shell
 cd src/test/resources
 docker-compose up -d
 ````
@@ -199,6 +200,6 @@ docker-compose up -d
 Then open [http://localhost:8080/](http://localhost:8080/)
 
 You can change the number of messages produce by second in the file *src/test/resources/.env*: (40msg/s)
-````bash
+````properties
 THROUGHPUT=40
 ````
