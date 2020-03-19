@@ -151,8 +151,13 @@ and provide Kibana dashboard.
 A docker-compose file provides a full environment with kafka and a simple producer/consumer.
 
 ````bash
-cd /src/test/resources
+cd src/test/resources
 docker-compose up -d
 ````
 
 Then open [http://localhost:8080/](http://localhost:8080/)
+
+You can change the number of messages produce by second in the file *src/test/resources/.env*: (40msg/s)
+````bash
+THROUGHPUT=40
+````
