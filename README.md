@@ -107,7 +107,9 @@ All traces are kafka messages sent to the topic **\_tracing**.
 
 key:
 ````yaml
-{"correlationId":"af8074bc-a042-46ef-8064-203fa26cd9b3"}
+{
+  "correlationId":"af8074bc-a042-46ef-8064-203fa26cd9b3"
+}
 ````
 
 value:
@@ -126,7 +128,11 @@ value:
 
 key:
 ````yaml
-{"topic":"test","partition":0,"offset":0}
+{
+  "topic":"test",
+  "partition":0,
+  "offset":0
+}
 ````
 
 value:
@@ -145,7 +151,11 @@ value:
 
 key:
 ````yaml
-{"topic":"test","partition":0,"offset":0}
+{
+  "topic":"test",
+  "partition":0,
+  "offset":0
+}
 ````
 
 value:
@@ -166,7 +176,11 @@ value:
 
 key:
 ````yaml
-{"topic":"test","partition":0,"offset":33}
+{
+  "topic":"test",
+  "partition":0,
+  "offset":33
+}
 ````
 
 value:
