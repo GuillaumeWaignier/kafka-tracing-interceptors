@@ -4,11 +4,31 @@
 
 Kafka Interceptors used to trace messages produced and consumed.
 
-They can be used in java producer/consumer, kafka connect and kafka stream applications.
+Interceptors can be used in java producer/consumer, kafka connect and kafka stream applications.
+All traces are kafka messages sent to the topic **\_tracing**.
 
 # Usage
 
 Add the interceptor class in the kafka producer/consumer configuration:
+> interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor
+> interceptor.classes=org.ianitrix.kafka.interceptors.ConsumerTracingInterceptor
+
+By default, the kafka producer that sends traces uses the same configuration as the producer/consumer where the interceptors are attached.
+These means, the bootstrap server, the compression, the security configuration will be reused.
+If some of these configurations are not specified, default values are used (see the table below).
+You can override this configuration by adding new properties prefixed with __ianitrix.interceptor.__
+
+
+
+| Property key     |   Default Value          | Is retrieve from producer/consumer config |
+| ---------------  | ------------------------:| ---------------------------------------   |
+| key.serializer   |  StringSerializer.class  | no                                        |
+| value.serializer |  StringSerializer.class  | no                                        |
+| acks             |  all                     | no                                        |
+| compression.type |  gzip                    | yes                                       |
+| client.id        |  <client.id>_interceptor | yes                                       |
+ 
+
 
 ## Example in Java
 
@@ -16,13 +36,20 @@ Producer (use **ProducerConfig.INTERCEPTOR\_CLASSES\_CONFIG**):
 
 ````java
 final Map<String, Object> config = new HashMap<>();
+
+// Producer configuration
 config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 config.put(ProducerConfig.ACKS_CONFIG, "all");
 config.put(ProducerConfig.CLIENT_ID_CONFIG, "example");
 config.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "zstd");
 config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+
+// Add the interceptor
 config.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, ProducerTracingInterceptor.class.getName());
+
+// Change the bootstrap server
+config.put("ianitrix.interceptor." + ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafkatrace:9092");
 
 final KafkaProducer<String, String> producer = new KafkaProducer<>(config);
 ````
@@ -31,6 +58,8 @@ Consumer (use **ConsumerConfig.INTERCEPTOR\_CLASSES\_CONFIG**):
 
 ```java
 final Map<String, Object> config = new HashMap<>();
+
+// Consumer configuration
 config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 config.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
 config.put(ConsumerConfig.CLIENT_ID_CONFIG, "example");
@@ -38,7 +67,13 @@ config.put(ConsumerConfig.GROUP_ID_CONFIG, "myGroupId");
 config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+
+// Add the interceptor
 config.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, ConsumerTracingInterceptor.class.getName());
+
+// Change the bootstrap server and set the compression type
+config.put("ianitrix.interceptor." + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafkatrace:9092");
+config.put("ianitrix.interceptor." + ProducerConfig.COMPRESSION_TYPE_CONFIG, "zstd");
 
 final KafkaConsumer<String, String> consumer = new KafkaConsumer<>(config);
 ```
@@ -48,13 +83,19 @@ final KafkaConsumer<String, String> consumer = new KafkaConsumer<>(config);
 Producer:
 
 ````bash
+...
 interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor
+ianitrix.interceptor.bootstrap.servers=kafkatrace:9092
+ianitrix.interceptor.compression.type=zstd
 ````
 
 Consumer:
 
 ````bash
 interceptor.classes=org.ianitrix.kafka.interceptors.ConsumerTracingInterceptor
+interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor
+ianitrix.interceptor.bootstrap.servers=kafkatrace:9092
+ianitrix.interceptor.compression.type=zstd
 ````
 
 # Tracing
