@@ -1,10 +1,7 @@
 package org.ianitrix.kafka.interceptors;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerInterceptor;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.ianitrix.kafka.interceptors.pojo.TraceType;
 import org.ianitrix.kafka.interceptors.pojo.TracingKey;
@@ -20,9 +17,12 @@ import java.util.Map;
 @Slf4j
 public class ConsumerTracingInterceptor extends AbstractTracingInterceptor implements ConsumerInterceptor<Object, Object> {
 
+    private String groupId;
+
     @Override
     public void configure(final Map<String, ?> configs) {
         super.configure(configs);
+        this.groupId = (String) configs.get(ConsumerConfig.GROUP_ID_CONFIG);
     }
 
     @Override
@@ -43,6 +43,7 @@ public class ConsumerTracingInterceptor extends AbstractTracingInterceptor imple
                 .topic(record.topic())
                 .partition(record.partition())
                 .offset(record.offset())
+                .groupId(this.groupId)
                 .build();
 
         final TracingValue value = TracingValue.builder()
@@ -51,6 +52,7 @@ public class ConsumerTracingInterceptor extends AbstractTracingInterceptor imple
                 .offset(record.offset())
                 .correlationId(correlationId)
                 .date(Instant.now().toString())
+                .groupId(this.groupId)
                 .type(TraceType.CONSUME)
                 .build();
 
@@ -68,6 +70,7 @@ public class ConsumerTracingInterceptor extends AbstractTracingInterceptor imple
                 .topic(topicPartition.topic())
                 .partition(topicPartition.partition())
                 .offset(offsetAndMetadata.offset() - 1)
+                .groupId(this.groupId)
                 .build();
 
         final TracingValue value = TracingValue.builder()
@@ -76,6 +79,7 @@ public class ConsumerTracingInterceptor extends AbstractTracingInterceptor imple
                 .offset(offsetAndMetadata.offset() - 1)
                 .date(Instant.now().toString())
                 .type(TraceType.COMMIT)
+                .groupId(this.groupId)
                 .build();
 
         super.sendTrace(key, value);

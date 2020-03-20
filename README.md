@@ -154,7 +154,8 @@ key:
 {
   "topic": "test",
   "partition": 0,
-  "offset": 0
+  "offset": 0,
+  "groupId": "myGroup"
 }
 ````
 
@@ -179,7 +180,8 @@ key:
 {
   "topic": "test",
   "partition": 0,
-  "offset": 33
+  "offset": 33,
+  "groupId": "myGroup"
 }
 ````
 

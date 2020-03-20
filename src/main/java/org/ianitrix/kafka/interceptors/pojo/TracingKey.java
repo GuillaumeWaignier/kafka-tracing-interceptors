@@ -19,5 +19,6 @@ public class TracingKey {
     private String topic;
     private Integer partition;
     private Long offset;
+    private String groupId;
     private String correlationId;
 }

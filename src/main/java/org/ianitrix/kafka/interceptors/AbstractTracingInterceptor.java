@@ -32,12 +32,10 @@ public abstract class AbstractTracingInterceptor  {
 
     private KafkaProducer<String, String> producer;
     private String clientId;
-    private String groupId;
 
     protected void configure(final Map<String, ?> configs) {
 
         this.clientId = (String) configs.get(ProducerConfig.CLIENT_ID_CONFIG);
-        this.groupId = (String) configs.get(ConsumerConfig.GROUP_ID_CONFIG);
 
         // Init with the same config from broker
         final Map<String, Object> producerConfig = new HashMap<>(configs);
@@ -88,7 +86,6 @@ public abstract class AbstractTracingInterceptor  {
     protected void sendTrace(final TracingKey key, final TracingValue value) {
 
         value.setClientId(this.clientId);
-        value.setGroupId(this.groupId);
 
         try {
             final String keyJson = this.mapper.writeValueAsString(key);
