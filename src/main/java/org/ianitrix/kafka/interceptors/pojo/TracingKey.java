@@ -8,6 +8,7 @@ import lombok.*;
  * The key of the tracing messages.
  * @author Guillaume Waignier
  */
+@ToString
 @Getter
 @Setter
 @Builder

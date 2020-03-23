@@ -9,6 +9,7 @@ import lombok.*;
  * The value of the tracing messages.
  * @author Guillaume Waignier
  */
+@ToString
 @Getter
 @Setter
 @Builder
