@@ -1,14 +1,18 @@
 version: "3.7"
 services:
   zookeeper:
-    image: "confluentinc/cp-zookeeper:${CONFLUENT_VERSION}"
+    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    container_name: zookeeper
     hostname: zookeeper
+    command: zookeeper-server-start
     networks:
       - confluent
     environment:
-      - ZOOKEEPER_SERVER_ID=1
-      - ZOOKEEPER_CLIENT_PORT=2181
-      - ZOOKEEPER_TICK_TIME=2000
+      - KAFKA_SERVER_ID=1
+      - KAFKA_clientPort=2181
+      - KAFKA_dataDir=/tmp/zookeeper
+      - KAFKA_tickTime=2000
+      - KAFKA_4lw_commands_whitelist=stat, ruok, conf, isro
       - KAFKA_OPTS=-Xms128m -Xmx128m
     healthcheck:
       test: test `echo "ruok" | nc localhost 2181 | grep "imok"`
@@ -18,8 +22,10 @@ services:
       start_period: 2s
 
   kafka:
-    image: "confluentinc/cp-enterprise-kafka:${CONFLUENT_VERSION}"
+    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    container_name: kafka
     hostname: kafka
+    command: kafka-server-start
     ports:
       - 9092:9092
     networks:
@@ -27,20 +33,29 @@ services:
     depends_on:
       - zookeeper
     environment:
-      - KAFKA_BROKER_ID=101
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-      - KAFKA_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
-      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
-      - KAFKA_DELETE_TOPIC_ENABLE=true
-      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_broker_id=101
+      - KAFKA_zookeeper_connect=zookeeper:2181
+      - KAFKA_listener_security_protocol_map=PLAINTEXT:PLAINTEXT
+      - KAFKA_advertised_listeners=PLAINTEXT://kafka:9092
+      - KAFKA_listeners=PLAINTEXT://:9092
+      - KAFKA_inter_broker_listener_name=PLAINTEXT
+      - KAFKA_auto_create_topics_enable=true
+      - KAFKA_delete_topic_enable=true
+      - KAFKA_offsets_topic_replication_factor=1
       - KAFKA_OPTS=-Xms256m -Xmx256m
+    restart: on-failure
+    healthcheck:
+      test: nc -z localhost 9092
+      interval: 2s
+      timeout: 2s
+      retries: 3
+      start_period: 2s
 
   schema-registry:
-    image: "confluentinc/cp-schema-registry:${CONFLUENT_VERSION}"
+    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    container_name: schema-registry
     hostname: schema-registry
+    command: schema-registry-start
     depends_on:
       - kafka
     ports:
@@ -49,13 +64,20 @@ services:
       - confluent
     environment:
       - SCHEMA_REGISTRY_OPTS=-Xms256m -Xmx256m
-      - SCHEMA_REGISTRY_LISTENERS=http://0.0.0.0:8081
-      - SCHEMA_REGISTRY_HOST_NAME=schema-registry
-      - SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL=zookeeper:2181
-      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=PLAINTEXT://kafka:9092
-      - SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL=PLAINTEXT
-      - SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_listeners=http://0.0.0.0:8081
+      - KAFKA_host_name=schema-registry
+      - KAFKA_kafkastore_connection_url=zookeeper:2181
+      - KAFKA_kafkastore_bootstrap_servers=PLAINTEXT://kafka:9092
+      - KAFKA_kafkastore_security_protocol=PLAINTEXT
+      - KAFKA_kafkastore_topic_replication_factor=1
+      - KAFKA_default_replication_factor=1
     restart: on-failure
+    healthcheck:
+      test: test `curl -s -o /dev/null -w "%{http_code}" http://localhost:8081` = 200
+      interval: 2s
+      timeout: 2s
+      retries: 3
+      start_period: 2s
 
 
   kafkahq:
@@ -85,7 +107,7 @@ services:
       - confluent
     depends_on:
       - kafka
-    command: "kafka-producer-perf-test --topic test --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer-props interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor bootstrap.servers=kafka:9092 client.id=myProducer"
+    entrypoint: "kafka-producer-perf-test --topic test --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer-props interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor bootstrap.servers=kafka:9092 client.id=myProducer"
     volumes:
       - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
     restart: on-failure
@@ -96,7 +118,7 @@ services:
       - confluent
     depends_on:
       - kafka
-    command: "kafka-console-consumer --topic test --from-beginning  --consumer-property interceptor.classes=org.ianitrix.kafka.interceptors.ConsumerTracingInterceptor --bootstrap-server kafka:9092 --consumer-property client.id=myConsumer --group=myGroup"
+    entrypoint: "kafka-console-consumer --topic test --from-beginning  --consumer-property interceptor.classes=org.ianitrix.kafka.interceptors.ConsumerTracingInterceptor --bootstrap-server kafka:9092 --consumer-property client.id=myConsumer --group=myGroup"
     volumes:
       - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
     restart: on-failure
