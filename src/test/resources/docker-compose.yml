@@ -14,6 +14,7 @@ services:
       - KAFKA_tickTime=2000
       - KAFKA_4lw_commands_whitelist=stat, ruok, conf, isro
       - KAFKA_OPTS=-Xms128m -Xmx128m
+    restart: on-failure
     healthcheck:
       test: test `echo "ruok" | nc localhost 2181 | grep "imok"`
       interval: 2s
