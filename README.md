@@ -116,6 +116,7 @@ value:
 
 ````yaml
 {
+  "id": "f84891ad-7729-4754-9a6d-f76754493260",
   "topic": "test",
   "correlationId": "af8074bc-a042-46ef-8064-203fa26cd9b3",
   "date": "2020-03-19T08:57:27.367553Z",
@@ -138,6 +139,7 @@ key:
 value:
 ````yaml
 {
+  "id": "hf4891ad-7729-4754-9a6d-f76124493260",
   "topic": "test",
   "partition": 0,
   "offset": 0,
@@ -162,6 +164,7 @@ key:
 value:
 ````yaml
 {
+  "id": "a4a891ad-7729-4754-9a6d-f76124493260",
   "topic": "test",
   "partition": 0,
   "offset": 0,
@@ -188,6 +191,7 @@ key:
 value:
 ````yaml
 {
+  "id": "344891ad-7729-4754-9a6d-f76124493azf",
   "topic": "test",
   "partition": 0,
   "offset": 33,

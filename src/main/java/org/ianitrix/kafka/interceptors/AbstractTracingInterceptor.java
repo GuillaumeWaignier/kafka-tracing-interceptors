@@ -86,6 +86,7 @@ public abstract class AbstractTracingInterceptor  {
     protected void sendTrace(final TracingKey key, final TracingValue value) {
 
         value.setClientId(this.clientId);
+        value.setId(UUID.randomUUID().toString());
 
         try {
             final String keyJson = this.mapper.writeValueAsString(key);

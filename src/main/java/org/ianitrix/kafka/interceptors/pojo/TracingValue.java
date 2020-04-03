@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
+import java.util.UUID;
+
 
 /**
  * The value of the tracing messages.
@@ -16,6 +18,7 @@ import lombok.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TracingValue {
+    private String id;
     private String topic;
     private Integer partition;
     private Long offset;
@@ -26,4 +29,6 @@ public class TracingValue {
     private String groupId;
 
     private Long durationMs;
+
+
 }

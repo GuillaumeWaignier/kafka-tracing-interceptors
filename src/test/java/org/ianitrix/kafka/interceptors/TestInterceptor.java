@@ -117,6 +117,7 @@ public class TestInterceptor {
         final String correlationId = send.getCorrelationId();
         Assertions.assertNotNull(correlationId);
         Assertions.assertNotNull(send.getDate());
+        Assertions.assertNotNull(send.getId());
         Assertions.assertEquals(PRODUCER_CLIENT_ID, send.getClientId());
 
         // ack
@@ -126,6 +127,7 @@ public class TestInterceptor {
         Assertions.assertEquals(partition, ack.getPartition());
         Assertions.assertEquals(offset, ack.getOffset());
         Assertions.assertNotNull(ack.getDate());
+        Assertions.assertNotNull(ack.getId());
         Assertions.assertEquals(PRODUCER_CLIENT_ID, ack.getClientId());
 
         // consume
@@ -136,6 +138,7 @@ public class TestInterceptor {
         Assertions.assertEquals(offset, consume.getOffset());
         Assertions.assertEquals(correlationId, consume.getCorrelationId());
         Assertions.assertNotNull(consume.getDate());
+        Assertions.assertNotNull(consume.getId());
         Assertions.assertEquals(CONSUMER_CLIENT_ID, consume.getClientId());
         Assertions.assertEquals(CONSUMER_GROUP_ID, consume.getGroupId());
 
@@ -152,6 +155,7 @@ public class TestInterceptor {
                 Assertions.assertEquals(-1, commit.getOffset());
             }
             Assertions.assertNotNull(commit.getDate());
+            Assertions.assertNotNull(commit.getId());
         }
 
 
