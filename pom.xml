@@ -14,24 +14,33 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<source.version>11</source.version>
+		
+		<!-- SonarCloud Configuration -->
+		<sonar.java.source>11</sonar.java.source>
+		<sonar.java.target>11</sonar.java.target>
+		<sonar.projectKey>GuillaumeWaignier_kafka-tracing-interceptors</sonar.projectKey>
+		<sonar.organization>guillaumewaignier-github</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 
-		<maven-assembly-plugin.version>3.1.1</maven-assembly-plugin.version>
-		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+		<maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
+		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 		<maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
-		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
-		<maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
-		<maven-source-plugin.version>3.0.1</maven-source-plugin.version>
-		<maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
+		<maven-jacoco-plugin.version>0.8.5</maven-jacoco-plugin.version>
+		<maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+		<maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+		<maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 		<mockito.version>2.27.0</mockito.version>
 
 		<!-- dependency versions -->
 		<awaitility.version>3.1.6</awaitility.version>
 		<jackson.version>2.10.3</jackson.version>
-		<junit.version>5.4.2</junit.version>
+		<junit.version>5.6.2</junit.version>
 		<kafka.version>2.4.1</kafka.version>
 		<logback.version>1.2.3</logback.version>
 		<lombok.version>1.18.12</lombok.version>
-		<testcontainers.version>1.11.2</testcontainers.version>
+		<testcontainers.version>1.14.3</testcontainers.version>
 	</properties>
 
 	<dependencies>
@@ -177,6 +186,29 @@
 					<failOnError>false</failOnError>
 				</configuration>
 			</plugin>
+			
+			<!-- Code coverage plugin -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${maven-jacoco-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
 		</plugins>
 	</build>
 </project>
