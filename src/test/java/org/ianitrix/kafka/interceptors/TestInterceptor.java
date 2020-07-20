@@ -11,7 +11,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.ianitrix.kafka.interceptors.pojo.TraceType;
 import org.ianitrix.kafka.interceptors.pojo.TracingValue;
 import org.junit.jupiter.api.Assertions;
@@ -21,6 +20,7 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -106,7 +106,7 @@ class TestInterceptor {
         }
 
         //check trace
-        Awaitility.await().atMost(Duration.FIVE_MINUTES).until(() -> traceTopicConsumer.traces.size() == 5);
+        Awaitility.await().atMost(Duration.ofMinutes(5)).until(() -> traceTopicConsumer.traces.size() == 5);
 
         log.info("5 messages consumed {}", traceTopicConsumer.traces.toString());
 
