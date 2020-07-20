@@ -27,7 +27,7 @@ import java.util.Map;
 
 @Testcontainers
 @Slf4j
-public class TestInterceptor {
+class TestInterceptor {
 
     private static final String TEST_TOPIC = "test";
 
@@ -81,7 +81,7 @@ public class TestInterceptor {
     }
 
     @Test
-    public void testSendMessage() {
+    void testSendMessage() {
 
         //send
         final String key = "A";
