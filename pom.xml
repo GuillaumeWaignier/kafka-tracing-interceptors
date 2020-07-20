@@ -9,7 +9,41 @@
 	<packaging>jar</packaging>
 
 	<name>kafka-tracing-interceptors</name>
+	<description>Kafka Interceptors used to trace messages produced and consumed</description>
 	<url>https://github.com/GuillaumeWaignier/kafka-tracing-interceptors</url>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
+	<developers>
+		<developer>
+			<name>Guillaume Waignier</name>
+			<organizationUrl>https://github.com/GuillaumeWaignier</organizationUrl>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:git://github.com/GuillaumeWaignier/kafka-tracing-interceptors.git</connection>
+		<developerConnection>scm:git:git://github.com/GuillaumeWaignier/kafka-tracing-interceptors.git</developerConnection>
+		<url>https://github.com/GuillaumeWaignier/kafka-tracing-interceptors/tree/master</url>
+		<tag>HEAD</tag>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -208,6 +242,8 @@
 					</execution>
 				</executions>
 			</plugin>
+
+
 			
 		</plugins>
 	</build>
