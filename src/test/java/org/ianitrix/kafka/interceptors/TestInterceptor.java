@@ -13,6 +13,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.awaitility.Awaitility;
 import org.ianitrix.kafka.interceptors.pojo.TraceType;
 import org.ianitrix.kafka.interceptors.pojo.TracingValue;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -132,15 +133,19 @@ class TestInterceptor {
 
         // consume
         final TracingValue consume = traceTopicConsumer.traces.get(2);
-        Assertions.assertEquals(TraceType.CONSUME, consume.getType());
-        Assertions.assertEquals(TEST_TOPIC, consume.getTopic());
-        Assertions.assertEquals(partition, consume.getPartition());
-        Assertions.assertEquals(offset, consume.getOffset());
-        Assertions.assertEquals(correlationId, consume.getCorrelationId());
         Assertions.assertNotNull(consume.getDate());
         Assertions.assertNotNull(consume.getId());
-        Assertions.assertEquals(CONSUMER_CLIENT_ID, consume.getClientId());
-        Assertions.assertEquals(CONSUMER_GROUP_ID, consume.getGroupId());
+        final TracingValue expectedConsume = new TracingValue();
+        expectedConsume.setType(TraceType.CONSUME);
+        expectedConsume.setTopic(TEST_TOPIC);
+        expectedConsume.setPartition(partition);
+        expectedConsume.setOffset(offset);
+        expectedConsume.setCorrelationId(correlationId);
+        expectedConsume.setClientId(CONSUMER_CLIENT_ID);
+        expectedConsume.setGroupId(CONSUMER_GROUP_ID);
+        expectedConsume.setId(consume.getId());
+        expectedConsume.setDate(consume.getDate());
+        Assert.assertEquals(expectedConsume, consume);
 
         // commit for each partition
         for (int i = 0 ; i < 2 ; i++) {
