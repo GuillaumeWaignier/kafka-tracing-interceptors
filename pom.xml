@@ -3,12 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.ianitrix.kafka</groupId>
-	<artifactId>tracing-interceptors</artifactId>
+	<groupId>org.ianitrix</groupId>
+	<artifactId>kafka-tracing-interceptors</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>tracing-interceptors</name>
+	<name>kafka-tracing-interceptors</name>
 	<url>https://github.com/GuillaumeWaignier/kafka-tracing-interceptors</url>
 
 	<properties>
