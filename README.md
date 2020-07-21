@@ -1,7 +1,9 @@
 # kafka-tracing-interceptors
 
+![License](https://img.shields.io/github/license/GuillaumeWaignier/kafka-tracing-interceptors)
 ![Build](https://github.com/GuillaumeWaignier/kafka-tracing-interceptors/workflows/Build/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=GuillaumeWaignier_kafka-tracing-interceptors&metric=alert_status)](https://sonarcloud.io/dashboard?id=GuillaumeWaignier_kafka-tracing-interceptors)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ianitrix/kafka-tracing-interceptors/badge.svg)](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A"org.ianitrix"%20AND%20a%3A"kafka-tracing-interceptors")
 
 Kafka Interceptors used to trace messages produced and consumed.
 
