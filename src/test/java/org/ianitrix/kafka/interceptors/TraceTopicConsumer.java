@@ -8,6 +8,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.ianitrix.kafka.interceptors.pojo.TracingKey;
 import org.ianitrix.kafka.interceptors.pojo.TracingValue;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -18,7 +19,8 @@ import java.util.*;
 @Slf4j
 public class TraceTopicConsumer implements Runnable {
 
-    public final List<TracingValue> traces = new LinkedList<>();
+    public final List<TracingValue> orderedTraces = new LinkedList<>();
+    public final Map<TracingKey, TracingValue> mapTraces = new HashMap<>();
 
     private KafkaConsumer<String, String> consumer;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -59,8 +61,10 @@ public class TraceTopicConsumer implements Runnable {
 
         try {
             final TracingValue tracingValue = mapper.readValue(record.value(), TracingValue.class);
-            this.traces.add(tracingValue);
-            log.debug(tracingValue.toString());
+            this.orderedTraces.add(tracingValue);
+            final TracingKey tracingKey = mapper.readValue(record.key(), TracingKey.class);
+            this.mapTraces.put(tracingKey, tracingValue);
+            log.info("Consume :<" + tracingKey + " ; " + tracingValue + ">");
         } catch (final IOException e) {
             log.error("Impossible to convert trace {}", record, e);
         }
