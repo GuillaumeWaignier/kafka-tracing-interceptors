@@ -44,18 +44,8 @@ jobs:
       run: mvn -B package verify sonar:sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }} --file pom.xml
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
      
     # Publish to maven central
-    #- name: Publish package
-    #  if: startsWith(github.ref, 'refs/tags/')
-    #  uses: samuelmeuli/action-maven-publish@v1
-    #  with:
-    #     gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-    #     gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
-    #     nexus_username: ${{ secrets.OSSRH_USERNAME }}
-    #     nexus_password: ${{ secrets.OSSRH_TOKEN }}
-    #     server_id: ossrh
     - name: Publish package
       if: startsWith(github.ref, 'refs/tags/')
       run: mvn -B deploy
@@ -63,6 +53,16 @@ jobs:
          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
 
+    # Compute archive file name
+    - name: Compute archive file name
+      id: fileName
+      run: echo "::set-output name=archiveFileName::`ls target/*-jar-with-dependencies.jar | cut -d'/' -f2`"    
+    
+    # Compute version
+    - name: Compute version of release
+      id: versionName
+      run: echo "::set-output name=versionName::`echo ${{ steps.fileName.outputs.archiveFileName }} | cut -d'-' -f4`"
+    
     # Create GitHub release
     - name: Create Release
       id: create_release
@@ -75,4 +75,16 @@ jobs:
          release_name: v${{ steps.versionName.outputs.versionName }}
          draft: true
          prerelease: true
-    
+       
+    # Upload Archive
+    - name: Upload Release Archive
+      id: upload-release-asset
+      if: startsWith(github.ref, 'refs/tags/') 
+      uses: actions/upload-release-asset@v1
+      env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+         upload_url: ${{ steps.create_release.outputs.upload_url }}
+         asset_path: target/${{ steps.fileName.outputs.archiveFileName }}
+         asset_name: ${{ steps.fileName.outputs.archiveFileName }}
+         asset_content_type: application/java-archive
