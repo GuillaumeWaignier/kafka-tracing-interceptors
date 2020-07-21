@@ -35,6 +35,9 @@ jobs:
       uses: actions/setup-java@v1
       with:
          java-version: 11
+         server-id: ossrh
+         server-username: MAVEN_USERNAME
+         server-password: MAVEN_PASSWORD
     
     # Build Maven
     - name: Build with Maven
@@ -44,15 +47,21 @@ jobs:
 
      
     # Publish to maven central
+    #- name: Publish package
+    #  if: startsWith(github.ref, 'refs/tags/')
+    #  uses: samuelmeuli/action-maven-publish@v1
+    #  with:
+    #     gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+    #     gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
+    #     nexus_username: ${{ secrets.OSSRH_USERNAME }}
+    #     nexus_password: ${{ secrets.OSSRH_TOKEN }}
+    #     server_id: ossrh
     - name: Publish package
       if: startsWith(github.ref, 'refs/tags/')
-      uses: samuelmeuli/action-maven-publish@v1
-      with:
-         gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-         gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
-         nexus_username: ${{ secrets.OSSRH_USERNAME }}
-         nexus_password: ${{ secrets.OSSRH_TOKEN }}
-         server_id: ossrh
+      run: mvn -B deploy
+      env:
+         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
 
     # Create GitHub release
     - name: Create Release
