@@ -22,12 +22,22 @@ jobs:
     - uses: actions/checkout@v2
       with:
          fetch-depth: 0
-    
+
+    # Import GPG Key
+    - name: Import GPG key
+      uses: crazy-max/ghaction-import-gpg@v2
+      env:
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
     # Java
     - name: Set up JDK 11
       uses: actions/setup-java@v1
       with:
          java-version: 11
+         server-id: ossrh
+         server-username: MAVEN_USERNAME
+         server-password: MAVEN_PASSWORD
     
     # Build Maven
     - name: Build with Maven
@@ -35,17 +45,23 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
+     
     # Publish to maven central
+    #- name: Publish package
+    #  if: startsWith(github.ref, 'refs/tags/')
+    #  uses: samuelmeuli/action-maven-publish@v1
+    #  with:
+    #     gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+    #     gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
+    #     nexus_username: ${{ secrets.OSSRH_USERNAME }}
+    #     nexus_password: ${{ secrets.OSSRH_TOKEN }}
+    #     server_id: ossrh
     - name: Publish package
       if: startsWith(github.ref, 'refs/tags/')
-      uses: samuelmeuli/action-maven-publish@v1
-      with:
-         gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-         gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
-         nexus_username: ${{ secrets.OSSRH_USERNAME }}
-         nexus_password: ${{ secrets.OSSRH_TOKEN }}
-         server_id: ossrh
+      run: mvn -B deploy
+      env:
+         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
 
     # Create GitHub release
     - name: Create Release
