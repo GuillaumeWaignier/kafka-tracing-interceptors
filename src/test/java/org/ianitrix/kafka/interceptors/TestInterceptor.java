@@ -185,8 +185,6 @@ class TestInterceptor {
             keyCommit.setGroupId(CONSUMER_GROUP_ID);
             Assertions.assertEquals(commit, traceTopicConsumer.mapTraces.get(keyCommit));
         }
-
-
     }
 
 }

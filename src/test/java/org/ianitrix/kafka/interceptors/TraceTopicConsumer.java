@@ -64,7 +64,7 @@ public class TraceTopicConsumer implements Runnable {
             this.orderedTraces.add(tracingValue);
             final TracingKey tracingKey = mapper.readValue(record.key(), TracingKey.class);
             this.mapTraces.put(tracingKey, tracingValue);
-            log.info("Consume :<" + tracingKey + " ; " + tracingValue + ">");
+            log.info("Consume :<" + tracingKey + " ; " + tracingValue + "> (" + tracingValue.hashCode() + ")");
         } catch (final IOException e) {
             log.error("Impossible to convert trace {}", record, e);
         }
