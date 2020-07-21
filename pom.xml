@@ -5,7 +5,7 @@
 
 	<groupId>org.ianitrix</groupId>
 	<artifactId>kafka-tracing-interceptors</artifactId>
-	<version>0.0.1</version>
+	<version>0.1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>kafka-tracing-interceptors</name>
