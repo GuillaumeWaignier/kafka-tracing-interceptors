@@ -111,7 +111,7 @@ services:
       - kafka
     entrypoint: "kafka-producer-perf-test --topic test --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer-props interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor bootstrap.servers=kafka:9092 client.id=myProducer1"
     volumes:
-      - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
+      - ../../../target/kafka-tracing-interceptors-0.1.0-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
     restart: on-failure
 
   load-data-p2:
@@ -122,7 +122,7 @@ services:
     - kafka
     entrypoint: "kafka-producer-perf-test --topic test --num-records 1000000 --throughput 2 --record-size 100 --producer-props interceptor.classes=org.ianitrix.kafka.interceptors.ProducerTracingInterceptor bootstrap.servers=kafka:9092 client.id=myProducer2"
     volumes:
-      - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
+      - ../../../target/kafka-tracing-interceptors-0.1.0-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
     restart: on-failure
 
   load-data-no-interceptor:
@@ -142,7 +142,7 @@ services:
       - kafka
     entrypoint: "kafka-console-consumer --topic test --from-beginning  --consumer-property interceptor.classes=org.ianitrix.kafka.interceptors.ConsumerTracingInterceptor --bootstrap-server kafka:9092 --consumer-property client.id=myConsumer1 --group=myGroup1"
     volumes:
-      - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
+      - ../../../target/kafka-tracing-interceptors-0.1.0-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
     restart: on-failure
 
   consume-data-c2:
@@ -153,7 +153,7 @@ services:
       - kafka
     entrypoint: "kafka-console-consumer --topic test --from-beginning  --consumer-property interceptor.classes=org.ianitrix.kafka.interceptors.ConsumerTracingInterceptor --bootstrap-server kafka:9092 --consumer-property client.id=myConsumer2 --group=myGroup2"
     volumes:
-      - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
+      - ../../../target/kafka-tracing-interceptors-0.1.0-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
     restart: on-failure
 
   consume-data-over:
@@ -164,7 +164,7 @@ services:
       - kafka
     entrypoint: "/overConsumption.sh kafka:9092 2000"
     volumes:
-      - ../../../target/tracing-interceptors-0.0.1-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
+      - ../../../target/kafka-tracing-interceptors-0.1.0-SNAPSHOT-jar-with-dependencies.jar:/confluent-${CONFLUENT_VERSION}/share/java/kafka/tracing-interceptors.jar:ro
       - ./overConsumption.sh:/overConsumption.sh:ro
     restart: on-failure
 
