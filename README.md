@@ -10,6 +10,16 @@ Kafka Interceptors used to trace messages produced and consumed.
 Interceptors can be used in java producer/consumer, kafka connect and kafka stream applications.
 All traces are kafka messages sent to the topic **\_tracing**.
 
+# Architecture
+
+![kafka-tracing-interceptor](kafka-tracing-interceptor.svg "Architecture")
+
+All traces are kafka messages sent to the topic **\_tracing**.
+The kstream [kafka-tracing-aggregator](https://github.com/GuillaumeWaignier/kafka-tracing-aggregator) enriches the traces and sends them in topic **\_aggregatedTrace**.
+A kafka connect connect consume **\_aggregatedTrace** and insert document in Elasticsearch.
+A kibana dashboard provide some visualization.
+
+
 # Usage
 
 Add the interceptor class in the kafka producer/consumer configuration:
@@ -101,15 +111,6 @@ interceptor.classes=org.ianitrix.kafka.interceptors.ConsumerTracingInterceptor
 ianitrix.interceptor.bootstrap.servers=kafkatrace:9092
 ianitrix.interceptor.compression.type=zstd
 ````
-
-# Architecture
-
-![kafka-tracing-interceptor](kafka-tracing-interceptor.svg "Architecture")
-
-All traces are kafka messages sent to the topic **\_tracing**.
-The kstream [kafka-tracing-aggregator](https://github.com/GuillaumeWaignier/kafka-tracing-aggregator) enriches the traces and sends them in topic **\_aggregatedTrace**.
-A kafka connect connect consume **\_aggregatedTrace** and insert document in Elasticsearch.
-A kibana dashboard provide some visualization.
 
 
 # Tracing
