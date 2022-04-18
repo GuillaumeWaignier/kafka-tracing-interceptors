@@ -74,7 +74,7 @@
 		<junit.version>5.7.0</junit.version>
 		<kafka.version>2.5.0</kafka.version>
 		<logback.version>1.2.3</logback.version>
-		<lombok.version>1.18.16</lombok.version>
+		<lombok.version>1.18.24</lombok.version>
 		<testcontainers.version>1.15.1</testcontainers.version>
 	</properties>
 
