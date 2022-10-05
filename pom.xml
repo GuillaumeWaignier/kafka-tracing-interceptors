@@ -70,7 +70,7 @@
 
 		<!-- dependency versions -->
 		<awaitility.version>4.0.3</awaitility.version>
-		<jackson.version>2.12.1</jackson.version>
+		<jackson.version>2.13.4</jackson.version>
 		<junit.version>5.7.0</junit.version>
 		<kafka.version>2.5.0</kafka.version>
 		<logback.version>1.2.3</logback.version>
